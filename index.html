@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BEO Clicker</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            background: linear-gradient(120deg, #1c1c1c, #4caf50);
+            color: #fff;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            font-size: 3em;
+            margin-top: 20px;
+            color: #2ecc71;
+        }
+        #logo {
+            width: 150px;
+            cursor: pointer;
+            margin: 20px auto;
+            display: block;
+            transition: transform 0.2s ease;
+        }
+        #logo:active {
+            transform: scale(1.2);
+        }
+        #balance {
+            font-size: 2em;
+            margin: 20px;
+        }
+        #per-second {
+            font-size: 1.2em;
+            color: #b2b2b2;
+        }
+        .info-section {
+            font-size: 1.2em;
+            margin: 20px 0;
+        }
+        .info-section span {
+            font-weight: bold;
+            color: #2ecc71;
+        }
+        .button {
+            margin-top: 20px;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            border: none;
+            background: #27ae60;
+            color: #fff;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .button:hover {
+            background: #2ecc71;
+        }
+        .shop {
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 10px;
+        }
+        .shop-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 15px 0;
+            padding: 10px 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background: #34495e;
+        }
+        .shop-item button {
+            padding: 10px 20px;
+            font-size: 1em;
+            background: #3498db;
+            border: none;
+            color: #fff;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .shop-item button:hover {
+            background: #2980b9;
+        }
+        .shop-item button:disabled {
+            background: #7f8c8d;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <h1>BEO Clicker</h1>
+    <img id="logo" src="https://i.postimg.cc/26ksYvQT/1000002199.png" alt="BEO Logo">
+    <div id="balance">0 BEO</div>
+    <div id="per-second">Earnings per second: 0 BEO</div>
+    <div class="info-section">
+        You have helped <span id="trees-planted">0</span> trees 🌳.  
+        Each click makes the world better!
+    </div>
+
+    <div class="shop">
+        <h2>Shop</h2>
+        <div class="shop-item">
+            <span>Upgrade: +1 token per click</span>
+            <button id="upgrade-click" data-cost="50">Buy for 50 BEO</button>
+        </div>
+        <div class="shop-item">
+            <span>Auto Miner: +0.5 BEO/sec</span>
+            <button id="upgrade-auto" data-cost="100">Buy for 100 BEO</button>
+        </div>
+    </div>
+
+    <script>
+        let tokens = parseFloat(localStorage.getItem('tokens')) || 0;
+        let tokensPerClick = parseFloat(localStorage.getItem('tokensPerClick')) || 1;
+        let tokensPerSecond = parseFloat(localStorage.getItem('tokensPerSecond')) || 0;
+        let treesPlanted = Math.floor(tokens / 10);
+
+        const logo = document.getElementById('logo');
+        const balanceDisplay = document.getElementById('balance');
+        const perSecondDisplay = document.getElementById('per-second');
+        const treesDisplay = document.getElementById('trees-planted');
+        const upgradeClickButton = document.getElementById('upgrade-click');
+        const upgradeAutoButton = document.getElementById('upgrade-auto');
+
+        function updateDisplay() {
+            balanceDisplay.textContent = `${tokens.toFixed(2)} BEO`;
+            perSecondDisplay.textContent = `Earnings per second: ${tokensPerSecond.toFixed(2)} BEO`;
+            treesDisplay.textContent = Math.floor(tokens / 10);
+        }
+
+        function updateShop() {
+            upgradeClickButton.disabled = tokens < parseFloat(upgradeClickButton.dataset.cost);
+            upgradeAutoButton.disabled = tokens < parseFloat(upgradeAutoButton.dataset.cost);
+        }
+
+        function saveData() {
+            localStorage.setItem('tokens', tokens);
+            localStorage.setItem('tokensPerClick', tokensPerClick);
+            localStorage.setItem('tokensPerSecond', tokensPerSecond);
+        }
+
+        logo.addEventListener('click', () => {
+            tokens += tokensPerClick;
+            updateDisplay();
+            updateShop();
+            saveData();
+        });
+
+        upgradeClickButton.addEventListener('click', () => {
+            const cost = parseFloat(upgradeClickButton.dataset.cost);
+            if (tokens >= cost) {
+                tokens -= cost;
+                tokensPerClick += 1;
+                upgradeClickButton.dataset.cost = (cost * 1.5).toFixed(2);
+                upgradeClickButton.textContent = `Buy for ${upgradeClickButton.dataset.cost} BEO`;
+                updateDisplay();
+                updateShop();
+                saveData();
+            }
+        });
+
+        upgradeAutoButton.addEventListener('click', () => {
+            const cost = parseFloat(upgradeAutoButton.dataset.cost);
+            if (tokens >= cost) {
+                tokens -= cost;
+                tokensPerSecond += 0.5;
+                upgradeAutoButton.dataset.cost = (cost * 1.5).toFixed(2);
+                upgradeAutoButton.textContent = `Buy for ${upgradeAutoButton.dataset.cost} BEO`;
+                updateDisplay();
+                updateShop();
+                saveData();
+            }
+        });
+
+        setInterval(() => {
+            tokens += tokensPerSecond;
+            updateDisplay();
+            updateShop();
+            saveData();
+        }, 1000);
+
+        updateDisplay();
+        updateShop();
+    </script>
+</body>
+</html>
